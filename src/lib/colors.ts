@@ -7,13 +7,22 @@ export const generateRandomColor = (): string => {
   return color;
 };
 
-export const generateMultipleColors = (count: number = 20, colors?: string[]): string[] => {
+export const generateMultipleColors = (
+  count: number = 20,
+  colors?: string[]
+): string[] => {
   const urlParams = new URLSearchParams(window.location.search);
   const encodedColors = urlParams.get("colors");
   colors = decodeColors(encodedColors);
+  if (colors) {
+    getHash(colors, window);
+    return colors;
+  }
+  colors = Array(count)
+    .fill(null)
+    .map(() => generateRandomColor());
+
   getHash(colors, window);
-  if (colors) return colors;
-  colors = Array(count).fill(null).map(() => generateRandomColor());
   return colors;
 };
 
@@ -25,7 +34,6 @@ export const isColorLight = (color: string): boolean => {
   const brightness = (r * 299 + g * 587 + b * 114) / 1000;
   return brightness > 128;
 };
-
 
 export function getHash(colors, window) {
   // Update URL with base64 encoded colors
@@ -143,7 +151,7 @@ function generateQualitativeColors(count) {
 }
 
 function generateSpatialColors(count) {
-    const colors = [];
+  const colors = [];
   for (let i = 0; i < count; i++) {
     const hue = Math.floor(Math.random() * 360);
     const saturation = Math.floor(Math.random() * 80 + 20);
