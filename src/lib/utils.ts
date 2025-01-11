@@ -4,7 +4,32 @@ import { twMerge } from "tailwind-merge"
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
-
+export function getHash(colors, window){
+  // Update URL with base64 encoded colors
+  const colorsString = JSON.stringify(colors);
+  const encodedColors = btoa(colorsString);
+  const newUrl = new URL(window.location);
+  newUrl.searchParams.set('colors', encodedColors);
+  window.history.pushState({}, '', newUrl);
+}
+window.onload = function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const encodedColors = urlParams.get('colors');
+  
+  if (encodedColors) {
+      try {
+          const colorsString = atob(encodedColors);
+          const colors = JSON.parse(colorsString);
+          if (Array.isArray(colors) && colors.length > 0) {
+             // generateColors(colors);
+              return;
+          }
+      } catch (e) {
+          console.error('Error loading colors from URL:', e);
+      }
+  }
+ // generateColors(); // Generate new colors if URL params are invalid or missing
+};
 export function getHarmonyColors(harmonyType, baseHue) {
   let colors = [];
   switch (harmonyType) {
