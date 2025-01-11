@@ -1,14 +1,18 @@
 import { LockClosedIcon, LockOpen1Icon } from "@radix-ui/react-icons";
-import { Palette, SunDim } from "lucide-react";
+import { SunDim, Palette, MoonStar } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { toast } from "sonner";
+import tinycolor from "tinycolor2";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { HexColorPicker } from "react-colorful";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ColorBlockProps {
   color: string;
   isLocked: boolean;
   onToggleLock: () => void;
-  onGenerateNew: () => void;
+  onGenerateNew: (newColor: string) => void;
 }
 
 export const ColorBlock = ({
@@ -18,6 +22,8 @@ export const ColorBlock = ({
   onGenerateNew,
 }: ColorBlockProps) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
+  const [tempColor, setTempColor] = useState(color);
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(color);
@@ -26,14 +32,35 @@ export const ColorBlock = ({
 
   const handleColorPicker = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // This will be implemented in a future feature
-    toast.info("Color picker feature coming soon!");
+    setIsColorPickerOpen(true);
   };
 
-  const handleShadeChange = (e: React.MouseEvent) => {
+  const handleColorChange = (newColor: string) => {
+    setTempColor(newColor);
+  };
+
+  const confirmColorChange = () => {
+    onGenerateNew(tempColor);
+    setIsColorPickerOpen(false);
+    toast.success("Color updated", {
+      description: `${color} → ${tempColor}`
+    });
+  };
+
+  const adjustColor = (color: string, amount: number): string => {
+    // Use tinycolor's built-in lighten and darken methods for more consistent results
+    const tc = tinycolor(color);
+    return tc[amount > 0 ? 'lighten' : 'darken'](Math.abs(amount)).toHexString();
+  };
+
+  const handleShadeChange = (e: React.MouseEvent, currentColor: string, shadeType: 'lighter' | 'darker') => {
     e.stopPropagation();
-    // This will be implemented in a future feature
-    toast.info("Shade adjustment feature coming soon!");
+    const shadeAmount = shadeType === 'lighter' ? 10 : -10;
+    const newColor = adjustColor(currentColor, shadeAmount);
+    onGenerateNew(newColor);
+    toast.success(`Generated ${shadeType} shade`, {
+      description: `${currentColor} → ${newColor}`
+    });
   };
 
   const textColor = isColorLight(color) ? "text-gray-900" : "text-white";
@@ -72,22 +99,84 @@ export const ColorBlock = ({
               <LockOpen1Icon className="w-5 h-5" />
             )}
           </button>
-          <button
-            onClick={handleColorPicker}
-            className={cn(
-              "p-3 rounded-full backdrop-blur-sm bg-white/10 hover:bg-white/20 transition-all"
-            )}
-          >
-            <Palette className="w-5 h-5" />
-          </button>
-          <button
-            onClick={handleShadeChange}
-            className={cn(
-              "p-3 rounded-full backdrop-blur-sm bg-white/10 hover:bg-white/20 transition-all"
-            )}
-          >
-            <SunDim className="w-5 h-5" />
-          </button>
+          <Dialog open={isColorPickerOpen} onOpenChange={setIsColorPickerOpen}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DialogTrigger asChild>
+                  <button
+                    onClick={handleColorPicker}
+                    className={cn(
+                      "p-3 rounded-full backdrop-blur-sm bg-white/10 hover:bg-white/20 transition-all",
+                      "group"
+                    )}
+                    aria-label="Open Color Picker"
+                  >
+                    <Palette className="w-5 h-5 group-hover:text-purple-300 transition-colors" />
+                  </button>
+                </DialogTrigger>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Choose Color</p>
+              </TooltipContent>
+            </Tooltip>
+            <DialogContent className="sm:max-w-[425px] flex flex-col items-center justify-center">
+              <div className="p-4 bg-white rounded-lg shadow-lg">
+                <HexColorPicker 
+                  color={tempColor} 
+                  onChange={handleColorChange} 
+                  className="mb-4"
+                />
+                <div className="flex justify-between space-x-4">
+                  <button 
+                    onClick={() => setIsColorPickerOpen(false)}
+                    className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={confirmColorChange}
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                  >
+                    Confirm
+                  </button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={(e) => handleShadeChange(e, color, 'lighter')}
+                className={cn(
+                  "p-3 rounded-full backdrop-blur-sm bg-white/10 hover:bg-white/20 transition-all",
+                  "group"
+                )}
+                aria-label="Lighten Color"
+              >
+                <SunDim className="w-5 h-5 group-hover:text-yellow-300 transition-colors" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Lighten Shade</p>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={(e) => handleShadeChange(e, color, 'darker')}
+                className={cn(
+                  "p-3 rounded-full backdrop-blur-sm bg-white/10 hover:bg-white/20 transition-all",
+                  "group"
+                )}
+                aria-label="Darken Color"
+              >
+                <MoonStar className="w-5 h-5 group-hover:text-indigo-300 transition-colors" style={{ transform: 'rotate(180deg)' }} />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Darken Shade</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
         <p className="text-2xl font-medium tracking-wider animate-slide-up">
           {color.toUpperCase()}
