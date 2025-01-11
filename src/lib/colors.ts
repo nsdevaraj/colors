@@ -8,9 +8,12 @@ export const generateRandomColor = (): string => {
 };
 
 export const generateMultipleColors = (count: number = 20, colors?: string[]): string[] => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const encodedColors = urlParams.get("colors");
+  colors = decodeColors(encodedColors);
+  getHash(colors, window);
   if (colors) return colors;
   colors = Array(count).fill(null).map(() => generateRandomColor());
-  getHash(colors, window);
   return colors;
 };
 
@@ -32,23 +35,20 @@ export function getHash(colors, window) {
   newUrl.searchParams.set("colors", encodedColors);
   window.history.pushState({}, "", newUrl);
 }
-window.onload = function () {
-  const urlParams = new URLSearchParams(window.location.search);
-  const encodedColors = urlParams.get("colors");
+export function decodeColors(encodedColors) {
   if (encodedColors) {
     try {
       const colorsString = atob(encodedColors);
       const colors = JSON.parse(colorsString);
       if (Array.isArray(colors) && colors.length > 0) {
-        generateMultipleColors(20, colors);
-        return;
+        return colors;
       }
     } catch (e) {
       console.error("Error loading colors from URL:", e);
     }
   }
-  generateMultipleColors(20); // Generate new colors if URL params are invalid or missing
-};
+}
+
 export function getHarmonyColors(harmonyType, baseHue) {
   let colors = [];
   switch (harmonyType) {
