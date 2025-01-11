@@ -9,7 +9,9 @@ export const generateRandomColor = (): string => {
 
 export const generateMultipleColors = (count: number = 20, colors?: string[]): string[] => {
   if (colors) return colors;
-  return Array(count).fill(null).map(() => generateRandomColor());
+  colors = Array(count).fill(null).map(() => generateRandomColor());
+  getHash(colors, window);
+  return colors;
 };
 
 export const isColorLight = (color: string): boolean => {
@@ -33,7 +35,6 @@ export function getHash(colors, window) {
 window.onload = function () {
   const urlParams = new URLSearchParams(window.location.search);
   const encodedColors = urlParams.get("colors");
-
   if (encodedColors) {
     try {
       const colorsString = atob(encodedColors);
