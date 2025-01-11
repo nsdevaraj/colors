@@ -51,33 +51,7 @@ export const ColorPalette = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <div className="flex items-center justify-center gap-2 p-4 bg-background/80 backdrop-blur-sm border-b">
-        <Button 
-          variant="outline" 
-          size="icon"
-          onClick={() => handleNumberChange(numberOfColors - 1)}
-          disabled={numberOfColors <= 1}
-        >
-          <Minus className="h-4 w-4" />
-        </Button>
-        <Input
-          type="number"
-          value={numberOfColors}
-          onChange={(e) => handleNumberChange(parseInt(e.target.value) || 1)}
-          className="w-20 text-center"
-          min={1}
-          max={100}
-        />
-        <Button 
-          variant="outline" 
-          size="icon"
-          onClick={() => handleNumberChange(numberOfColors + 1)}
-          disabled={numberOfColors >= 100}
-        >
-          <Plus className="h-4 w-4" />
-        </Button>
-      </div>
+    <div className="flex flex-col min-h-screen"> 
       <div className="flex flex-wrap flex-1">
         {colors.map((color, index) => (
           <ColorBlock
