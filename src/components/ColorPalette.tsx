@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 import { ColorBlock } from "./ColorBlock";
-import { generateMultipleColors, generateRandomColor } from "@/lib/colors";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
-import { Minus, Plus } from "lucide-react";
+import { generateMultipleColors, generateRandomColor, getHash } from "@/lib/colors";
 
 interface ColorState {
   hex: string;
@@ -13,7 +10,7 @@ interface ColorState {
 export const ColorPalette = () => {
   const [numberOfColors, setNumberOfColors] = useState<number>(20);
   const [colors, setColors] = useState<ColorState[]>(
-    generateMultipleColors(numberOfColors).map(hex => ({ hex, locked: false }))
+    generateMultipleColors(numberOfColors).map((hex) => ({ hex, locked: false }))
   );
 
   useEffect(() => {
@@ -23,7 +20,7 @@ export const ColorPalette = () => {
         generateNewColors();
       }
     };
-
+    getHash(colors.map((color) => color.hex),window)
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
   }, [colors]);
@@ -44,32 +41,25 @@ export const ColorPalette = () => {
     );
   };
 
-  const handleNumberChange = (newValue: number) => {
-    const validValue = Math.max(1, Math.min(100, newValue));
-    setNumberOfColors(validValue);
-    setColors(generateMultipleColors(validValue).map(hex => ({ hex, locked: false })));
+  const handleColorChange = (index: number, newColor: string) => {
+    setColors((prevColors) =>
+      prevColors.map((color, i) => (i === index ? { ...color, hex: newColor } : color))
+    );
   };
 
   return (
     <div className="flex flex-col min-h-screen"> 
       <div className="flex flex-wrap flex-1">
-        {colors.map((color, index) => (
+        {colors.map((color, index) => { return (
           <ColorBlock
             key={index}
+            index={index}
             color={color.hex}
             isLocked={color.locked}
             onToggleLock={() => toggleLock(index)}
-            onGenerateNew={() => {
-              if (!color.locked) {
-                setColors((prevColors) =>
-                  prevColors.map((c, i) =>
-                    i === index ? { ...c, hex: generateRandomColor() } : c
-                  )
-                );
-              }
-            }}
+            onGenerateNew={handleColorChange}
           />
-        ))}
+        )})}
       </div>
     </div>
   );
