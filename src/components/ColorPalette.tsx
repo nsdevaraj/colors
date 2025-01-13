@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 import { ColorBlock } from "./ColorBlock";
-import { generateMultipleColors, generateRandomColor } from "@/lib/colors";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
-import { Minus, Plus } from "lucide-react";
+import { generateMultipleColors, generateRandomColor, getHash } from "@/lib/colors";
 
 interface ColorState {
   hex: string;
@@ -13,7 +10,7 @@ interface ColorState {
 export const ColorPalette = () => {
   const [numberOfColors, setNumberOfColors] = useState<number>(20);
   const [colors, setColors] = useState<ColorState[]>(
-    generateMultipleColors(numberOfColors).map((hex, index) => ({ hex, locked: false }))
+    generateMultipleColors(numberOfColors).map((hex) => ({ hex, locked: false }))
   );
 
   useEffect(() => {
@@ -23,7 +20,7 @@ export const ColorPalette = () => {
         generateNewColors();
       }
     };
-
+    getHash(colors.map((color) => color.hex),window)
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
   }, [colors]);
@@ -44,12 +41,6 @@ export const ColorPalette = () => {
         i === index ? { ...color, locked: !color.locked } : color
       )
     );
-  };
-
-  const handleNumberChange = (newValue: number) => {
-    const validValue = Math.max(1, Math.min(100, newValue));
-    setNumberOfColors(validValue);
-    setColors(generateMultipleColors(validValue).map((hex, index) => ({ hex,locked: false })));
   };
 
   const handleColorChange = (index: number, newColor: string) => {
