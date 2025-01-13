@@ -26,8 +26,6 @@ export const ColorPalette = () => {
   }, [colors]);
 
   const generateNewColors = () => {
-    console.log("generateNewColors");
-
     setColors((prevColors) =>
       prevColors.map((color) =>
         color.locked ? color : { ...color, hex: generateRandomColor() }
@@ -44,7 +42,6 @@ export const ColorPalette = () => {
   };
 
   const handleColorChange = (index: number, newColor: string) => {
-    console.log("newColor", newColor, colors, index);
     setColors((prevColors) =>
       prevColors.map((color, i) => (i === index ? { ...color, hex: newColor } : color))
     );
@@ -53,7 +50,7 @@ export const ColorPalette = () => {
   return (
     <div className="flex flex-col min-h-screen"> 
       <div className="flex flex-wrap flex-1">
-        {colors.map((color, index) => { console.log(color,index); return (
+        {colors.map((color, index) => { return (
           <ColorBlock
             key={index}
             index={index}

@@ -23,7 +23,6 @@ export const ColorBlock = ({
   onToggleLock,
   onGenerateNew,
 }: ColorBlockProps) => {
-  console.log(index, color)
   const [isHovered, setIsHovered] = useState(false);
   const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
   const [tempColor, setTempColor] = useState(color);
