@@ -160,3 +160,9 @@ function generateSpatialColors(count) {
   }
   return colors;
 }
+
+export const isValidHexColor = (color: string): boolean => {
+  // Validate hex color code (6 characters, only 0-9 and A-F)
+  const hexRegex = /^[0-9A-F]{6}$/;
+  return hexRegex.test(color);
+};

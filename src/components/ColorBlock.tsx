@@ -26,10 +26,13 @@ export const ColorBlock = ({
   const [isHovered, setIsHovered] = useState(false);
   const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
   const [tempColor, setTempColor] = useState(color);
+  const [colorInputError, setColorInputError] = useState('');
+  const [colorInputValue, setColorInputValue] = useState(color.replace('#', ''));
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(color);
-    toast.success("Color code copied to clipboard!");
+    const url = window.location.href;
+    navigator.clipboard.writeText(url);
+    toast.success("URL copied to clipboard, paste it on PowerBI!");
   };
 
   const handleColorPicker = (e: React.MouseEvent) => {
@@ -39,10 +42,31 @@ export const ColorBlock = ({
 
   const handleColorChange = (newColor: string) => {
     setTempColor(newColor);
+    setColorInputValue(newColor.replace('#', ''));
+    setColorInputError('');
+  };
+
+  const handleColorInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value.toUpperCase().replace(/[^0-9A-F]/g, '').slice(0, 6);
+    setColorInputValue(inputValue);
+
+    if (inputValue.length === 6) {
+      const newColor = `#${inputValue}`;
+      if (tinycolor(newColor).isValid()) {
+        setTempColor(newColor);
+        setColorInputError('');
+      } else {
+        setColorInputError('Invalid color code');
+      }
+    } else {
+      setColorInputError('');
+    }
   };
 
   const confirmColorChange = () => {
-    onGenerateNew(index,tempColor);
+    if (colorInputError) return;
+
+    onGenerateNew(index, tempColor);
     setIsColorPickerOpen(false);
     toast.success("Color updated", {
       description: `${color} → ${tempColor}`
@@ -122,22 +146,45 @@ export const ColorBlock = ({
               </TooltipContent>
             </Tooltip>
             <DialogContent className="sm:max-w-[425px] flex flex-col items-center justify-center">
-              <div className="p-4 bg-white rounded-lg shadow-lg">
+              <div className="p-4 bg-white rounded-lg shadow-lg w-full">
                 <HexColorPicker 
                   color={tempColor} 
                   onChange={handleColorChange} 
-                  className="mb-4"
+                  className="mb-4 w-full"
                 />
+                <div className="flex items-center space-x-2 mb-4">
+                  <div className="flex-grow">
+                    <div className="flex items-center border rounded">
+                      <span className="pl-2 text-gray-500">#</span>
+                      <input 
+                        type="text" 
+                        value={colorInputValue}
+                        onChange={handleColorInputChange}
+                        placeholder="Enter color code"
+                        maxLength={6}
+                        className="w-full p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    {colorInputError && (
+                      <p className="text-red-500 text-sm mt-1">{colorInputError}</p>
+                    )}
+                  </div>
+                  <div 
+                    className="w-12 h-12 border rounded" 
+                    style={{ backgroundColor: tempColor }}
+                  />
+                </div>
                 <div className="flex justify-between space-x-4">
                   <button 
                     onClick={() => setIsColorPickerOpen(false)}
-                    className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition-colors"
+                    className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition-colors flex-1"
                   >
                     Cancel
                   </button>
                   <button 
                     onClick={confirmColorChange}
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                    disabled={!!colorInputError || colorInputValue.length !== 6}
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Confirm
                   </button>
@@ -179,10 +226,7 @@ export const ColorBlock = ({
               <p>Darken Shade</p>
             </TooltipContent>
           </Tooltip>
-        </div>
-        <p className="text-2xl font-medium tracking-wider animate-slide-up">
-          {color.toUpperCase()}
-        </p>
+        </div> 
       </div>
     </div>
   );
