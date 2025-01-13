@@ -9,18 +9,21 @@ import { HexColorPicker } from "react-colorful";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ColorBlockProps {
+  index: number;
   color: string;
   isLocked: boolean;
   onToggleLock: () => void;
-  onGenerateNew: (newColor: string) => void;
+  onGenerateNew: (index: number, newColor: string) => void;
 }
 
 export const ColorBlock = ({
+  index,
   color,
   isLocked,
   onToggleLock,
   onGenerateNew,
 }: ColorBlockProps) => {
+  console.log(index, color)
   const [isHovered, setIsHovered] = useState(false);
   const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
   const [tempColor, setTempColor] = useState(color);
@@ -40,7 +43,7 @@ export const ColorBlock = ({
   };
 
   const confirmColorChange = () => {
-    onGenerateNew(tempColor);
+    onGenerateNew(index,tempColor);
     setIsColorPickerOpen(false);
     toast.success("Color updated", {
       description: `${color} → ${tempColor}`
@@ -57,7 +60,7 @@ export const ColorBlock = ({
     e.stopPropagation();
     const shadeAmount = shadeType === 'lighter' ? 10 : -10;
     const newColor = adjustColor(currentColor, shadeAmount);
-    onGenerateNew(newColor);
+    onGenerateNew(index,newColor);
     toast.success(`Generated ${shadeType} shade`, {
       description: `${currentColor} → ${newColor}`
     });
